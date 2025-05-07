@@ -134,7 +134,7 @@ export default function Alerts() {
                     className="border-b border-thin border-divider hover:bg-gray-50"
                   >
                     <td className="px-4 py-4">
-                      <div className="font-medium">{alert.type}</div>
+                      <div className="font-medium text-gray-500">{alert.type}</div>
                     </td>
                     <td className="px-4 py-4 text-gray-500">
                       {alert.well}

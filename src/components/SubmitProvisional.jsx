@@ -100,7 +100,7 @@ export default function SubmitProvisional() {
             Drop the report here, or{' '}
             <button
               onClick={handleBrowseClick}
-              className="text-orange-500 hover:text-orange-600 underline"
+              className="text-orange-500 bg-white hover:text-orange-600 underline"
             >
               browse your files
             </button>

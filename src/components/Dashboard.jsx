@@ -49,7 +49,7 @@ export default function Dashboard() {
           <div className="flex flex-col md:flex-row gap-6 mt-4 md:mt-0">
             <div className="p-1">
               <div className="flex items-center justify-between gap-4">
-                <span className="text-5xl font-bold">1,520</span>
+                <span className="text-5xl text-black font-bold">1,520</span>
                 <span className="bg-orange-100 text-orange-600 px-2 py-1 rounded-md font-medium">
                   $10.9
                 </span>
@@ -59,7 +59,7 @@ export default function Dashboard() {
 
             <div className="p-1">
               <div className="flex items-center justify-between gap-4">
-                <span className="text-5xl font-bold">78</span>
+                <span className="text-5xl text-black font-bold">78</span>
                 <span className="bg-orange-100 text-orange-600 px-2 py-1 rounded-md font-medium">
                   $5.9
                 </span>
@@ -83,7 +83,7 @@ export default function Dashboard() {
               </div>
 
               <div className="flex gap-2">
-                <button className="px-4 py-2 rounded border border-gray-300 bg-white text-gray-700 flex items-center gap-2 hover:bg-gray-50 transition-colors duration-200">
+                <button className="px-4 py-2  hover:border-orangePtrm rounded border border-gray-300 bg-white text-gray-700 flex items-center gap-2 hover:bg-gray-50 transition-colors duration-200">
                   <img src="/export.svg" alt="Export" className="h-5 w-5" />
                   <span>Export</span>
                 </button>
@@ -143,8 +143,8 @@ export default function Dashboard() {
                   />
                 </div>
 
-                <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg whitespace-nowrap hover:bg-gray-50 transition-colors duration-200">
-                  <Filter className="h-5 w-5" />
+                <button className="flex items-center gap-2 px-4 py-2 hover:border-orangePtrm text-black  bg-white border border-gray-300 rounded-lg whitespace-nowrap hover:bg-gray-50 transition-colors duration-200">
+                  <Filter className="  text-black h-5 w-5" />
                   <span>Filters</span>
                 </button>
               </div>
@@ -249,7 +249,7 @@ export default function Dashboard() {
                         </div>
                       </td>
                       <td className="px-4 py-4 text-center">
-                        <div className="font-medium">Well #{well.id}</div>
+                        <div className="font-medium text-gray-500">Well #{well.id}</div>
                       </td>
                       <td className="px-4 py-4 text-center">
                         <div className="flex justify-center">
@@ -280,8 +280,8 @@ export default function Dashboard() {
                       </td>
                       <td className="px-4 py-4 text-center">
                         <div className="flex justify-center">
-                          <button className="rounded-full p-1 hover:bg-gray-100 transition-colors duration-150">
-                            <MoreVertical className="h-5 w-5 text-gray-400" />
+                          <button className="rounded-full p-1 bg-white hover:border-orangePtrm transition-colors duration-150">
+                            <MoreVertical className="h-5 w-5  text-gray-400" />
                           </button>
                         </div>
                       </td>
@@ -295,10 +295,10 @@ export default function Dashboard() {
             <div className="flex justify-between items-center mt-4 pt-4">
               <div className="text-sm text-gray-500">1 - 8 of 40 items</div>
               <div className="flex gap-2">
-                <button className="px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 transition-colors duration-200">
+                <button className="px-4 py-2 border border-gray-300 rounded-md bg-white  hover:border-orangePtrm text-gray-700 hover:bg-gray-50 transition-colors duration-200">
                   Previous
                 </button>
-                <button className="px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 transition-colors duration-200">
+                <button className="px-4 py-2 border border-gray-300 rounded-md bg-white  hover:border-orangePtrm text-gray-700 hover:bg-gray-50 transition-colors duration-200">
                   Next
                 </button>
               </div>
