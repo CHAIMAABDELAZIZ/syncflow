@@ -1,6 +1,6 @@
 import './App.css';
 import AuthIngnr from './pages/AuthIngnr';
-import Dashboard from './components/Dashboard';
+import Dashboard from './components/Wells';
 import Alerts from './components/alerts';
 import SubmitReport from './components/SubmitReport';
 import Layout from './components/Layout';
@@ -16,7 +16,7 @@ function App() {
         
         {/* Protected layout with navbar */}
         <Route element={<Layout />}>
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/Wells" element={<Dashboard />} />
           <Route path="/alerts" element={<Alerts />} />
           <Route path="/submit-report" element={<SubmitReport />} />
           <Route path="/submit-provisional" element={<SubmitProvisional />} />

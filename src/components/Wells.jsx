@@ -15,12 +15,14 @@ const mockWells = [
   { id: "A-113", status: "InActive", phase: "Nom du phase", progress: 70 },
 ];
 
-export default function Dashboard() {
+export default function Wells() {
   const [selectedWells, setSelectedWells] = useState(["A-107", "A-108", "A-109"]);
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
   const [filterStatus, setFilterStatus] = useState("");
   const [filterProgress, setFilterProgress] = useState("");
+  const [wells, setWells] = useState(mockWells); // State to manage wells data
+  const [openDropdownId, setOpenDropdownId] = useState(null);
   const itemsPerPage = 5;
 
   const toggleWellSelection = (wellId) => {
@@ -41,7 +43,7 @@ export default function Dashboard() {
   };
 
   // Filter logic
-  const filteredWells = mockWells.filter((well) => {
+  const filteredWells = wells.filter((well) => {
     const matchesStatus = filterStatus ? well.status === filterStatus : true;
     const matchesProgress = filterProgress
       ? (filterProgress === "above50" ? well.progress > 50 : well.progress <= 50)
@@ -75,9 +77,25 @@ export default function Dashboard() {
     console.log("Opening add oil well form...");
   };
 
-  // Handle more vertical action
-  const handleMoreAction = (wellId) => {
-    console.log(`Action clicked for well ${wellId}`);
+  // Handle action dropdown
+  const toggleDropdown = (wellId) => {
+    setOpenDropdownId(openDropdownId === wellId ? null : wellId);
+  };
+
+  const handleViewDetails = (wellId) => {
+    console.log(`Viewing details for well ${wellId}`);
+    setOpenDropdownId(null);
+  };
+
+  const handleEditWell = (wellId) => {
+    console.log(`Editing well ${wellId}`);
+    setOpenDropdownId(null);
+  };
+
+  const handleDeleteWell = (wellId) => {
+    setWells(wells.filter((well) => well.id !== wellId));
+    setOpenDropdownId(null);
+    setSelectedWells(selectedWells.filter((id) => id !== wellId)); // Update selected wells
   };
 
   // Handle filters
@@ -350,13 +368,35 @@ export default function Dashboard() {
                         </div>
                       </td>
                       <td className="px-4 py-4 text-center">
-                        <div className="flex justify-center">
+                        <div className="relative flex justify-center">
                           <button
-                            onClick={() => handleMoreAction(well.id)}
-                            className="rounded-full p-1 bg-white hover:border-orange-500 transition-colors duration-150"
+                            onClick={() => toggleDropdown(well.id)}
+                            className="rounded-full p-1 bg-white border-none hover:bg-gray-100 focus:outline-none transition-colors duration-150"
                           >
                             <MoreVertical className="h-5 w-5 text-gray-400" />
                           </button>
+                          {openDropdownId === well.id && (
+                            <div className="absolute right-0 mt-8 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                              <button
+                                onClick={() => handleViewDetails(well.id)}
+                                className="block bg-white w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              >
+                                View Details
+                              </button>
+                              <button
+                                onClick={() => handleEditWell(well.id)}
+                                className="block bg-white w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              >
+                                Edit Well
+                              </button>
+                              <button
+                                onClick={() => handleDeleteWell(well.id)}
+                                className="block bg-white w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-gray-100"
+                              >
+                                Delete Well
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </td>
                     </tr>
