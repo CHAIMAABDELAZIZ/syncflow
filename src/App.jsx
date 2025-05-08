@@ -6,6 +6,7 @@ import SubmitReport from './components/SubmitReport';
 import Layout from './components/Layout';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import SubmitProvisional from './components/SubmitProvisional';
+import Home from './pages/home';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/alerts" element={<Alerts />} />
           <Route path="/submit-report" element={<SubmitReport />} />
           <Route path="/submit-provisional" element={<SubmitProvisional />} />
+          <Route path="/home" element={<Home />} />
         </Route>
       </Routes>
     </BrowserRouter>

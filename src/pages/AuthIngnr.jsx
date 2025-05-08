@@ -42,7 +42,7 @@ function AuthIngnr() {
         if (roleUsers && roleUsers[username] === password) {
             // Successful login
             console.log('Login successful', { role, username });
-            navigate('/dashboard');
+            navigate('/home');
         } else {
             // Failed login
             const roleName = role === 'manager' ? 'Well Operations Manager' : 'Well Operations Engineer';
