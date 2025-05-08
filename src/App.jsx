@@ -6,7 +6,7 @@ import SubmitReport from './components/SubmitReport';
 import Layout from './components/Layout';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import SubmitProvisional from './components/SubmitProvisional';
-import Home from './pages/home';
+import Home from './pages/Home';
 
 function App() {
   return (
