@@ -4,9 +4,11 @@ import Dashboard from './components/Dashboard';
 import Alerts from './components/alerts';
 import SubmitReport from './components/SubmitReport';
 import Layout from './components/Layout';
+import Reports from './pages/Reports';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import SubmitProvisional from './components/SubmitProvisional';
 import Home from './pages/Home';
+import PrvsReport from './pages/PrvsReport';
 
 function App() {
   return (
@@ -20,7 +22,8 @@ function App() {
           <Route path="/alerts" element={<Alerts />} />
           <Route path="/submit-report" element={<SubmitReport />} />
           <Route path="/submit-provisional" element={<SubmitProvisional />} />
-          <Route path="/home" element={<Home />} />
+          <Route path="/home" element={<PrvsReport/>} /> 
+          {/*  <Reports/> <Home /> */}
         </Route>
       </Routes>
     </BrowserRouter>

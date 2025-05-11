@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { IoMdPerson, IoMdLock } from "react-icons/io";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import logo from '../assets/logo.png';
-import './AuthIngnr.css'; // Import the new CSS file*
 import { useNavigate } from 'react-router-dom';
 
 
@@ -51,7 +50,8 @@ function AuthIngnr() {
     };
 
     return (
-        <div className="auth-container  ">
+        <div className="flex items-center justify-center min-h-screen w-screen bg-[#789599] text-white">
+
             <div className="bg-whitePtrm p-6 sm:p-8 shadow-lg w-full max-w-md rounded-lg">
             {/* Logo + Title */}
                 <div className="flex flex-col items-center">
