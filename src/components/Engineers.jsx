@@ -1,19 +1,16 @@
 import { useState } from "react";
 import { Search, MoreVertical, Filter, Download } from "lucide-react";
 
-// Mock data
-const mockEngineers = [
-  { id: 1, fullName: "Chaïm Abdelaziz", contact: "lc.abdelaziz@esi.dz", role: "Drilling responsible", well: "Well #A-103", createdAt: "30 Apr, 2025", lastConnection: "Today" },
-  { id: 2, fullName: "Chaïm Abdelaziz", contact: "lc.abdelaziz@esi.dz", role: "Drilling responsible", well: "Well #A-103", createdAt: "30 Apr, 2025", lastConnection: "Yesterday" },
-  { id: 3, fullName: "Chaïm Abdelaziz", contact: "lc.abdelaziz@esi.dz", role: "Drilling responsible", well: "Well #A-103", createdAt: "30 Apr, 2025", lastConnection: "Week ago" },
-  { id: 4, fullName: "Chaïm Abdelaziz", contact: "lc.abdelaziz@esi.dz", role: "Drilling responsible", well: "Well #A-103", createdAt: "30 Apr, 2025", lastConnection: "Week ago" },
-  { id: 5, fullName: "Chaïm Abdelaziz", contact: "lc.abdelaziz@esi.dz", role: "Drilling responsible", well: "Well #A-103", createdAt: "30 Apr, 2025", lastConnection: "Week ago" },
-  { id: 6, fullName: "Chaïm Abdelaziz", contact: "lc.abdelaziz@esi.dz", role: "Drilling responsible", well: "Well #A-103", createdAt: "30 Apr, 2025", lastConnection: "Week ago" },
-  { id: 7, fullName: "Chaïm Abdelaziz", contact: "lc.abdelaziz@esi.dz", role: "Drilling responsible", well: "Well #A-103", createdAt: "30 Apr, 2025", lastConnection: "Week ago" },
-  { id: 8, fullName: "Chaïm Abdelaziz", contact: "lc.abdelaziz@esi.dz", role: "Drilling responsible", well: "Well #A-103", createdAt: "30 Apr, 2025", lastConnection: "Week ago" },
-  { id: 9, fullName: "Chaïm Abdelaziz", contact: "lc.abdelaziz@esi.dz", role: "Drilling responsible", well: "Well #A-103", createdAt: "30 Apr, 2025", lastConnection: "Week ago" },
-  { id: 10, fullName: "Chaïm Abdelaziz", contact: "lc.abdelaziz@esi.dz", role: "Drilling responsible", well: "Well #A-103", createdAt: "30 Apr, 2025", lastConnection: "Week ago" },
-];
+// Mock data (adjusted for 8 items per page)
+const mockEngineers = Array(40).fill().map((_, index) => ({
+  id: index + 1,
+  fullName: "Chaima Abdelaziz",
+  contact: "lc.abdelaziz@esi.dz",
+  role: "Drilling responsible",
+  well: "Well #A-103",
+  createdAt: "30 Apr, 2025",
+  lastConnection: index === 0 ? "Today" : index === 1 ? "Yesterday" : "Week ago",
+}));
 
 export default function Engineers() {
   const [selectedEngineers, setSelectedEngineers] = useState([4, 5]);
@@ -23,15 +20,14 @@ export default function Engineers() {
   const [filterLastConnection, setFilterLastConnection] = useState("");
   const [engineers, setEngineers] = useState(mockEngineers);
   const [openDropdownId, setOpenDropdownId] = useState(null);
-  const itemsPerPage = 5;
+  const itemsPerPage = 8; // 8 items per page to match screenshot
 
   const toggleEngineerSelection = (engineerId) => {
-    if (selectedEngineers.includes(engineerId)) {
-      setSelectedEngineers(selectedEngineers.filter((id) => id !== engineerId));
-    } else {
-      setSelectedEngineers([...selectedEngineers, engineerId]);
-    }
-    console.log("Selected engineers:", selectedEngineers);
+    setSelectedEngineers((prev) =>
+      prev.includes(engineerId)
+        ? prev.filter((id) => id !== engineerId)
+        : [...prev, engineerId]
+    );
   };
 
   // Filter logic
@@ -51,9 +47,15 @@ export default function Engineers() {
 
   // Handle export
   const handleExport = () => {
-    const csvContent = "data:text/csv;charset=utf-8,"
-      + "ID,Full Name,Contact,Role,Associated Well,Created At,Last Connection\n"
-      + filteredEngineers.map(row => `${row.id},${row.fullName},${row.contact},${row.role},${row.well},${row.createdAt},${row.lastConnection}`).join("\n");
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      "ID,Full Name,Contact,Role,Associated Well,Created At,Last Connection\n" +
+      filteredEngineers
+        .map(
+          (row) =>
+            `${row.id},${row.fullName},${row.contact},${row.role},${row.well},${row.createdAt},${row.lastConnection}`
+        )
+        .join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -61,7 +63,6 @@ export default function Engineers() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    console.log("Exporting engineers data...");
   };
 
   // Handle add engineer
@@ -97,7 +98,7 @@ export default function Engineers() {
 
   const applyFilters = () => {
     setShowFilters(false);
-    setCurrentPage(1); // Reset to first page after applying filters
+    setCurrentPage(1);
   };
 
   // Handle page change
@@ -111,54 +112,58 @@ export default function Engineers() {
         <div className="flex flex-col md:flex-row justify-between items-start mb-6">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Engineers</h1>
-            <p className="text-gray-500">A descriptive body text comes here</p>
+            <p className="text-gray-500 mt-1">Jun 1 - Aug 31, 2025</p>
           </div>
-          <div className="flex gap-2">
-            <button
-              onClick={handleAddEngineer}
-              className="px-4 py-2 rounded bg-orange-500 text-white flex items-center gap-2 hover:bg-orange-600 transition-colors duration-200"
-            >
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M6 1V11M1 6H11" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              <span>Add Engineer</span>
-            </button>
+          <div className="flex gap-4 mt-4 md:mt-0">
+            <div className="bg-white rounded-lg shadow p-4 text-center">
+              <h2 className="text-xl font-semibold text-gray-900">1,520</h2>
+              <p className="text-sm text-gray-500">Total Engineers</p>
+              <p className="text-orange-500 font-medium">$9.0</p>
+            </div>
+            <div className="bg-white rounded-lg shadow p-4 text-center">
+              <h2 className="text-xl font-semibold text-gray-900">78</h2>
+              <p className="text-sm text-gray-500">New Engineers</p>
+              <p className="text-orange-500 font-medium">$5.9</p>
+            </div>
           </div>
         </div>
 
-        {/* Table */}
+        {/* Table Section */}
         <div className="bg-white rounded-lg shadow p-6 relative">
-          {/* Search, Filter, and Export inside the table */}
-          <div className="flex flex-wrap md:flex-row justify-end items-center mb-4 gap-2">
+          {/* Engineers Title (replacing tabs) */}
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">Engineers</h2>
+              <p className="text-gray-500 mt-1">A descriptive body text comes here</p>
+            </div>
             <div className="flex gap-2 items-center relative">
               <button
-                  onClick={handleExport}
-                  className="px-4 py-2 hover:border-orange-500 rounded border border-gray-300 bg-white text-gray-700 flex items-center gap-2 hover:bg-gray-50 transition-colors duration-200"
-                >
-                  <img src="/export.svg" alt="Export" className="h-5 w-5" />
-                  <span>Export</span>
-                </button>
+                onClick={handleExport}
+                className="px-4 py-2 rounded border border-gray-300 bg-white text-gray-700 flex items-center gap-2 hover:bg-gray-50 transition-colors duration-200"
+              >
+                <Download className="h-5 w-5" />
+                <span>Export</span>
+              </button>
               <div className="relative w-60">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                   <Search className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
                   type="text"
-                  className="block w-full text-black pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 transition-shadow duration-200"
-                  placeholder="Search"
+                  className="block w-full text-black pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-orange-500"
+                  placeholder="Search..."
                 />
               </div>
               <button
                 onClick={toggleFilters}
-                className="flex items-center gap-2 px-4 py-2 text-black bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+                className="flex items-center gap-2 px-4 py-2 text-black bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
               >
-                <Filter className="text-black h-5 w-5" />
+                <Filter className="h-5 w-5" />
                 <span>Filters</span>
               </button>
               {showFilters && (
-                <div className="absolute right-6 top-12 w-64 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-10">
+                <div className="absolute right-0 top-12 w-64 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-10">
                   <h3 className="text-sm font-semibold text-gray-700 mb-2">Filter Options</h3>
-                  {/* Filter by Role */}
                   <div className="mb-4">
                     <label className="block text-sm text-gray-600 mb-1">Role</label>
                     <select
@@ -170,7 +175,6 @@ export default function Engineers() {
                       <option value="Drilling responsible">Drilling responsible</option>
                     </select>
                   </div>
-                  {/* Filter by Last Connection */}
                   <div className="mb-4">
                     <label className="block text-sm text-gray-600 mb-1">Last Connection</label>
                     <select
@@ -186,15 +190,37 @@ export default function Engineers() {
                   </div>
                   <button
                     onClick={applyFilters}
-                    className="w-full bg-orange-500 text-white py-2 rounded-md hover:bg-orange-600 transition-colors duration-200"
+                    className="w-full bg-orange-500 text-white py-2 rounded-md hover:bg-orange-600"
                   >
                     Apply Filters
                   </button>
                 </div>
               )}
+              <button
+                onClick={handleAddEngineer}
+                className="px-4 py-2 rounded bg-orange-500 text-white flex items-center gap-2 hover:bg-orange-600"
+              >
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 12 12"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M6 1V11M1 6H11"
+                    stroke="white"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <span>Add Engineer</span>
+              </button>
             </div>
           </div>
 
+          {/* Table */}
           <div className="overflow-x-auto">
             <table className="min-w-full">
               <thead>
@@ -203,53 +229,124 @@ export default function Engineers() {
                     <div className="flex justify-center">
                       {selectedEngineers.length > 0 ? (
                         <button
-                          className="h-2 w-2 bg-white rounded border border-orange-500 flex items-center justify-center hover:bg-orange-50 transition-colors duration-150"
+                          className="h-6 w-6 bg-white rounded border border-orange-500 flex items-center justify-center hover:bg-orange-50"
                           onClick={() => setSelectedEngineers([])}
                         >
-                          <div className="h-0.5 w-1 bg-orange-500 rounded-sm"></div>
+                          <div className="h-0.5 w-3 bg-orange-500 rounded-sm"></div>
                         </button>
                       ) : (
                         <div className="h-6 w-6 border border-gray-300 rounded"></div>
                       )}
                     </div>
                   </th>
-                  <th className="px-4 py-3 text-center font-medium text-gray-500">
+                  <th className="px-4 py-3 text-center font-medium text-gray-400">
                     <div className="flex items-center justify-center gap-1">
                       <span>Full name</span>
-                      <img src="/arrow-down.svg" alt="Sort" className="h-4 w-4" />
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
                     </div>
                   </th>
-                  <th className="px-4 py-3 text-center font-medium text-gray-500">
+                  <th className="px-4 py-3 text-center font-medium text-gray-400">
                     <div className="flex items-center justify-center gap-1">
                       <span>Contact</span>
-                      <img src="/phone.svg" alt="Contact" className="h-4 w-4" />
+                      <img
+                          src="/phone.svg"
+                          alt="Status"
+                          className="h-4 w-4"
+                        />
                     </div>
                   </th>
-                  <th className="px-4 py-3 text-center font-medium text-gray-500">
+                  <th className="px-4 py-3 text-center font-medium text-gray-400">
                     <div className="flex items-center justify-center gap-1">
                       <span>Role</span>
-                      <img src="/role.svg" alt="Role" className="h-4 w-4" />
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
+                      </svg>
                     </div>
                   </th>
-                  <th className="px-4 py-3 text-center font-medium text-gray-500">
+                  <th className="px-4 py-3 text-center font-medium text-gray-400">
                     <div className="flex items-center justify-center gap-1">
                       <span>Associated well</span>
-                      <img src="/phase.svg" alt="Well" className="h-4 w-4" />
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M8 7h12m0 0l-4-4m4 4l-4 4m-4-4H4m4 8h12m-12 0l4-4m-4 4l4 4"
+                        />
+                      </svg>
                     </div>
                   </th>
-                  <th className="px-4 py-3 text-center font-medium text-gray-500">
+                  <th className="px-4 py-3 text-center font-medium text-gray-400">
                     <div className="flex items-center justify-center gap-1">
                       <span>Created at</span>
-                      <img src="/calendar.svg" alt="Created" className="h-4 w-4" />
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
                     </div>
                   </th>
-                  <th className="px-4 py-3 text-center font-medium text-gray-500">
+                  <th className="px-4 py-3 text-center font-medium text-gray-400">
                     <div className="flex items-center justify-center gap-1">
                       <span>Last connection</span>
-                      <img src="/calendar.svg" alt="Last Connection" className="h-4 w-4" />
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
                     </div>
                   </th>
-                  <th className="px-4 py-3 text-center font-medium text-gray-500 w-16">Action</th>
+                  <th className="px-4 py-3 text-center font-medium text-gray-400 w-16">
+                    Action
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -267,7 +364,7 @@ export default function Engineers() {
                           />
                           <label
                             htmlFor={`checkbox-${engineer.id}`}
-                            className="absolute inset-0 flex cursor-pointer items-center justify-center rounded border border-gray-300 bg-white peer-checked:bg-orange-500 peer-checked:border-orange-500 hover:border-orange-300 transition-colors duration-150"
+                            className="absolute inset-0 flex cursor-pointer items-center justify-center rounded border border-gray-300 bg-white peer-checked:bg-orange-500 peer-checked:border-orange-500 hover:border-orange-300"
                           >
                             {selectedEngineers.includes(engineer.id) && (
                               <svg
@@ -290,8 +387,10 @@ export default function Engineers() {
                     </td>
                     <td className="px-4 py-4 text-center">
                       <div className="flex items-center justify-center gap-2">
-                        <img src="/engineer-placeholder.png" alt="Engineer" className="h-8 w-8 rounded-full" />
-                        <span className="font-medium text-gray-500">{engineer.fullName}</span>
+                        <div className="h-8 w-8 rounded-full bg-gray-200">
+                          <img alt="Profile" class="h-full w-full object-cover" src="/engineer-placeholder.png" />
+                        </div>
+                        <span className="text-gray-700">{engineer.fullName}</span>
                       </div>
                     </td>
                     <td className="px-4 py-4 text-center text-gray-500">{engineer.contact}</td>
@@ -303,7 +402,7 @@ export default function Engineers() {
                       <div className="relative flex justify-center">
                         <button
                           onClick={() => toggleDropdown(engineer.id)}
-                          className="rounded-full p-1 bg-white border-none hover:bg-gray-100 focus:outline-none transition-colors duration-150"
+                          className="rounded-full p-1 bg-white border-none hover:bg-gray-100 focus:outline-none"
                         >
                           <MoreVertical className="h-5 w-5 text-gray-400" />
                         </button>
@@ -340,19 +439,20 @@ export default function Engineers() {
           {/* Pagination */}
           <div className="flex justify-between items-center mt-4 pt-4">
             <div className="text-sm text-gray-500">
-              {indexOfFirstItem + 1} - {Math.min(indexOfLastItem, filteredEngineers.length)} of {filteredEngineers.length} items
+              {indexOfFirstItem + 1} - {Math.min(indexOfLastItem, filteredEngineers.length)} of{" "}
+              {filteredEngineers.length} items
             </div>
             <div className="flex gap-2">
               <button
                 onClick={prevPage}
-                className="px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                className="px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50"
                 disabled={currentPage === 1}
               >
                 Previous
               </button>
               <button
                 onClick={nextPage}
-                className="px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                className="px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50"
                 disabled={currentPage === totalPages}
               >
                 Next
