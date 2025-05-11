@@ -269,20 +269,11 @@ export default function Engineers() {
                   <th className="px-4 py-3 text-center font-medium text-gray-400">
                     <div className="flex items-center justify-center gap-1">
                       <span>Contact</span>
-                      <svg
-                        className="h-4 w-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M3 5h18M3 12h18M3 19h18"
+                      <img
+                          src="/phone.svg"
+                          alt="Sort"
+                          className="h-4 w-4"
                         />
-                      </svg>
                     </div>
                   </th>
                   <th className="px-4 py-3 text-center font-medium text-gray-400">
@@ -404,7 +395,9 @@ export default function Engineers() {
                     </td>
                     <td className="px-4 py-4 text-center">
                       <div className="flex items-center justify-center gap-2">
-                        <div className="h-8 w-8 rounded-full bg-gray-200"></div>
+                        <div className="h-8 w-8 rounded-full bg-gray-200">
+                        <img alt="Profile" class="h-full w-full object-cover" src="/engineer-placeholder.png" />
+                        </div>
                         <span className="text-gray-700">{engineer.fullName}</span>
                       </div>
                     </td>
