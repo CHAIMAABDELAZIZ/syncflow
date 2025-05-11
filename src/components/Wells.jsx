@@ -9,16 +9,21 @@ const mockWells = [
   { id: "A-107", status: "Active", phase: "Nom du phase", progress: 60 },
   { id: "A-108", status: "InActive", phase: "Nom du phase", progress: 80 },
   { id: "A-109", status: "Active", phase: "Nom du phase", progress: 98 },
-  // You can add more mock data as needed
+  { id: "A-110", status: "Active", phase: "Nom du phase", progress: 75 },
+  { id: "A-111", status: "InActive", phase: "Nom du phase", progress: 50 },
+  { id: "A-112", status: "Active", phase: "Nom du phase", progress: 65 },
+  { id: "A-113", status: "InActive", phase: "Nom du phase", progress: 70 },
 ];
 
-export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState(1);
-  const [selectedWells, setSelectedWells] = useState([
-    "A-107",
-    "A-108",
-    "A-109",
-  ]);
+export default function Wells() {
+  const [selectedWells, setSelectedWells] = useState(["A-107", "A-108", "A-109"]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterStatus, setFilterStatus] = useState("");
+  const [filterProgress, setFilterProgress] = useState("");
+  const [wells, setWells] = useState(mockWells); // State to manage wells data
+  const [openDropdownId, setOpenDropdownId] = useState(null);
+  const itemsPerPage = 5;
 
   const toggleWellSelection = (wellId) => {
     if (selectedWells.includes(wellId)) {
@@ -26,6 +31,7 @@ export default function Dashboard() {
     } else {
       setSelectedWells([...selectedWells, wellId]);
     }
+    console.log("Selected wells:", selectedWells);
   };
 
   const getStatusTextColor = (status) => {
@@ -35,6 +41,77 @@ export default function Dashboard() {
   const getStatusBgColor = (status) => {
     return status === "Active" ? "bg-green-100" : "bg-red-100";
   };
+
+  // Filter logic
+  const filteredWells = wells.filter((well) => {
+    const matchesStatus = filterStatus ? well.status === filterStatus : true;
+    const matchesProgress = filterProgress
+      ? (filterProgress === "above50" ? well.progress > 50 : well.progress <= 50)
+      : true;
+    return matchesStatus && matchesProgress;
+  });
+
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentWells = filteredWells.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredWells.length / itemsPerPage);
+
+  // Handle export
+  const handleExport = () => {
+    const csvContent = "data:text/csv;charset=utf-8,"
+      + "ID,Status,Phase,Progress\n"
+      + filteredWells.map(row => `${row.id},${row.status},${row.phase},${row.progress}`).join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "wells_data.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    console.log("Exporting wells data...");
+  };
+
+  // Handle add oil well
+  const handleAddOilWell = () => {
+    console.log("Opening add oil well form...");
+  };
+
+  // Handle action dropdown
+  const toggleDropdown = (wellId) => {
+    setOpenDropdownId(openDropdownId === wellId ? null : wellId);
+  };
+
+  const handleViewDetails = (wellId) => {
+    console.log(`Viewing details for well ${wellId}`);
+    setOpenDropdownId(null);
+  };
+
+  const handleEditWell = (wellId) => {
+    console.log(`Editing well ${wellId}`);
+    setOpenDropdownId(null);
+  };
+
+  const handleDeleteWell = (wellId) => {
+    setWells(wells.filter((well) => well.id !== wellId));
+    setOpenDropdownId(null);
+    setSelectedWells(selectedWells.filter((id) => id !== wellId)); // Update selected wells
+  };
+
+  // Handle filters
+  const toggleFilters = () => {
+    setShowFilters(!showFilters);
+  };
+
+  const applyFilters = () => {
+    setShowFilters(false);
+    setCurrentPage(1); // Reset to first page after applying filters
+  };
+
+  // Handle page change
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const nextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
+  const prevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
 
   return (
     <div className="dashboard-container bg-[#FEFCFA] min-h-screen p-8">
@@ -83,70 +160,83 @@ export default function Dashboard() {
               </div>
 
               <div className="flex gap-2">
-                <button className="px-4 py-2  hover:border-orangePtrm rounded border border-gray-300 bg-white text-gray-700 flex items-center gap-2 hover:bg-gray-50 transition-colors duration-200">
+                <button
+                  onClick={handleExport}
+                  className="px-4 py-2 hover:border-orange-500 rounded border border-gray-300 bg-white text-gray-700 flex items-center gap-2 hover:bg-gray-50 transition-colors duration-200"
+                >
                   <img src="/export.svg" alt="Export" className="h-5 w-5" />
                   <span>Export</span>
                 </button>
-                <button className="px-4 py-2 rounded bg-orange-500 text-white flex items-center gap-2 hover:bg-orange-600 transition-colors duration-200">
+                <button
+                  onClick={handleAddOilWell}
+                  className="px-4 py-2 rounded bg-orange-500 text-white flex items-center gap-2 hover:bg-orange-600 transition-colors duration-200"
+                >
                   <img src="/plus.svg" alt="Add" className="h-3 w-3" />
                   <span>Add oil well</span>
                 </button>
               </div>
             </div>
 
-            {/* Tabs, Search and Filter in one line */}
-            <div className="flex flex-wrap md:flex-nowrap items-center justify-between mb-4 gap-3">
-              {/* Tabs */}
-              <div className="inline-flex rounded-md border border-gray-200 overflow-hidden">
-                <button
-                  className={`py-2 px-4 ${
-                    activeTab === 1
-                      ? "bg-white text-gray-800 font-medium"
-                      : "bg-gray-50 text-gray-500 hover:bg-gray-100 transition-colors duration-200"
-                  }`}
-                  onClick={() => setActiveTab(1)}
-                >
-                  Active Tab 1
-                </button>
-                <button
-                  className={`py-2 px-4 border-l ${
-                    activeTab === 2
-                      ? "bg-white text-gray-800 font-medium"
-                      : "bg-gray-50 text-gray-500 hover:bg-gray-100 transition-colors duration-200"
-                  }`}
-                  onClick={() => setActiveTab(2)}
-                >
-                  Tab 2
-                </button>
-                <button
-                  className={`py-2 px-4 border-l ${
-                    activeTab === 3
-                      ? "bg-white text-gray-800 font-medium"
-                      : "bg-gray-50 text-gray-500 hover:bg-gray-100 transition-colors duration-200"
-                  }`}
-                  onClick={() => setActiveTab(3)}
-                >
-                  Tab3
-                </button>
-              </div>
-
-              {/* Search and Filter */}
-              <div className="flex gap-2 items-center">
+            {/* Search and Filter */}
+            <div className="flex flex-wrap md:flex-nowrap items-center justify-end mb-4 gap-3">
+              <div className="flex gap-2 items-center relative">
                 <div className="relative w-60 md:w-72">
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <Search className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
                     type="text"
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 transition-shadow duration-200"
+                    className="block w-full text-black pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 transition-shadow duration-200"
                     placeholder="Search"
                   />
                 </div>
 
-                <button className="flex items-center gap-2 px-4 py-2 hover:border-orangePtrm text-black  bg-white border border-gray-300 rounded-lg whitespace-nowrap hover:bg-gray-50 transition-colors duration-200">
-                  <Filter className="  text-black h-5 w-5" />
-                  <span>Filters</span>
-                </button>
+                <div className="relative">
+                  <button
+                    onClick={toggleFilters}
+                    className="flex items-center gap-2 px-4 py-2 text-black bg-white border border-gray-300 rounded-lg whitespace-nowrap hover:bg-gray-50 transition-colors duration-200"
+                  >
+                    <Filter className="text-black h-5 w-5" />
+                    <span>Filters</span>
+                  </button>
+                  {showFilters && (
+                    <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-10">
+                      <h3 className="text-sm font-semibold text-gray-700 mb-2">Filter Options</h3>
+                      {/* Filter by Status */}
+                      <div className="mb-4">
+                        <label className="block text-sm text-gray-600 mb-1">Status</label>
+                        <select
+                          value={filterStatus}
+                          onChange={(e) => setFilterStatus(e.target.value)}
+                          className="w-full border bg-white text-black border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
+                        >
+                          <option value="">All</option>
+                          <option value="Active">Active</option>
+                          <option value="InActive">Inactive</option>
+                        </select>
+                      </div>
+                      {/* Filter by Progress */}
+                      <div className="mb-4">
+                        <label className="block text-sm text-gray-600 mb-1">Progress</label>
+                        <select
+                          value={filterProgress}
+                          onChange={(e) => setFilterProgress(e.target.value)}
+                          className="w-full border bg-white text-black border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
+                        >
+                          <option value="">All</option>
+                          <option value="above50">Above 50%</option>
+                          <option value="below50">Below 50%</option>
+                        </select>
+                      </div>
+                      <button
+                        onClick={applyFilters}
+                        className="w-full bg-orange-500 text-white py-2 rounded-md hover:bg-orange-600 transition-colors duration-200"
+                      >
+                        Apply Filters
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -156,20 +246,19 @@ export default function Dashboard() {
                 <thead>
                   <tr className="border-b border-thin border-divider">
                     <th className="px-4 py-3 text-center w-10 bg-header-bg">
-                      {/* Keep this div at a fixed size regardless of state */}
                       <div
                         className="flex justify-center"
                         style={{ minHeight: "24px", minWidth: "24px" }}
                       >
                         {selectedWells.length > 0 ? (
                           <button
-                            className="h-6 w-6 rounded border border-orange-500 flex items-center justify-center hover:bg-orange-50 transition-colors duration-150"
+                            className="h-2 w-2 bg-white rounded border border-orange-500 flex items-center justify-center hover:bg-orange-50 transition-colors duration-150"
                             onClick={() => setSelectedWells([])}
                           >
-                            <div className="h-0.5 w-3 bg-orange-500 rounded-sm"></div>
+                            <div className="h-0.5 w-1 bg-orange-500 rounded-sm"></div>
                           </button>
                         ) : (
-                          <div className="h-6 w-6"></div>
+                          <div className="h-6 w-6 border border-gray-300 rounded"></div>
                         )}
                       </div>
                     </th>
@@ -209,7 +298,7 @@ export default function Dashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {mockWells.map((well) => (
+                  {currentWells.map((well) => (
                     <tr
                       key={well.id}
                       className="border-b border-thin border-divider hover:bg-gray-50"
@@ -279,10 +368,35 @@ export default function Dashboard() {
                         </div>
                       </td>
                       <td className="px-4 py-4 text-center">
-                        <div className="flex justify-center">
-                          <button className="rounded-full p-1 bg-white hover:border-orangePtrm transition-colors duration-150">
-                            <MoreVertical className="h-5 w-5  text-gray-400" />
+                        <div className="relative flex justify-center">
+                          <button
+                            onClick={() => toggleDropdown(well.id)}
+                            className="rounded-full p-1 bg-white border-none hover:bg-gray-100 focus:outline-none transition-colors duration-150"
+                          >
+                            <MoreVertical className="h-5 w-5 text-gray-400" />
                           </button>
+                          {openDropdownId === well.id && (
+                            <div className="absolute right-0 mt-8 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                              <button
+                                onClick={() => handleViewDetails(well.id)}
+                                className="block bg-white w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              >
+                                View Details
+                              </button>
+                              <button
+                                onClick={() => handleEditWell(well.id)}
+                                className="block bg-white w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              >
+                                Edit Well
+                              </button>
+                              <button
+                                onClick={() => handleDeleteWell(well.id)}
+                                className="block bg-white w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-gray-100"
+                              >
+                                Delete Well
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -293,12 +407,22 @@ export default function Dashboard() {
 
             {/* Pagination */}
             <div className="flex justify-between items-center mt-4 pt-4">
-              <div className="text-sm text-gray-500">1 - 8 of 40 items</div>
+              <div className="text-sm text-gray-500">
+                {indexOfFirstItem + 1} - {Math.min(indexOfLastItem, filteredWells.length)} of {filteredWells.length} items
+              </div>
               <div className="flex gap-2">
-                <button className="px-4 py-2 border border-gray-300 rounded-md bg-white  hover:border-orangePtrm text-gray-700 hover:bg-gray-50 transition-colors duration-200">
+                <button
+                  onClick={prevPage}
+                  className="px-4 py-2 border border-gray-300 rounded-md bg-white hover:border-orange-500 text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                  disabled={currentPage === 1}
+                >
                   Previous
                 </button>
-                <button className="px-4 py-2 border border-gray-300 rounded-md bg-white  hover:border-orangePtrm text-gray-700 hover:bg-gray-50 transition-colors duration-200">
+                <button
+                  onClick={nextPage}
+                  className="px-4 py-2 border border-gray-300 rounded-md bg-white hover:border-orange-500 text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                  disabled={currentPage === totalPages}
+                >
                   Next
                 </button>
               </div>

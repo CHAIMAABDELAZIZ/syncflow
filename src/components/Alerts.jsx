@@ -1,5 +1,5 @@
-import React from 'react';
-import { MoreVertical, ChevronDown } from 'lucide-react';
+import React, { useState } from 'react';
+import { MoreVertical, ChevronDown, Search, Filter } from 'lucide-react';
 
 // Mock data
 const mockAlerts = [
@@ -21,6 +21,65 @@ function getSeverityColor(severity) {
 }
 
 export default function Alerts() {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterSeverity, setFilterSeverity] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [alerts, setAlerts] = useState(mockAlerts);
+  const [openDropdownId, setOpenDropdownId] = useState(null);
+  const itemsPerPage = 4;
+
+  // Filter and search logic
+  const filteredAlerts = alerts.filter((alert) => {
+    const matchesSeverity = filterSeverity ? alert.severity === filterSeverity : true;
+    const matchesSearch = searchQuery
+      ? alert.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        alert.well.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        alert.recommendation.toLowerCase().includes(searchQuery.toLowerCase())
+      : true;
+    return matchesSeverity && matchesSearch;
+  });
+
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentAlerts = filteredAlerts.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredAlerts.length / itemsPerPage);
+
+  // Handle page change
+  const nextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
+  const prevPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
+
+  // Handle filters
+  const toggleFilters = () => {
+    setShowFilters(!showFilters);
+  };
+
+  const applyFilters = () => {
+    setShowFilters(false);
+    setCurrentPage(1); // Reset to first page after applying filters
+  };
+
+  // Handle action dropdown
+  const toggleDropdown = (id) => {
+    setOpenDropdownId(openDropdownId === id ? null : id);
+  };
+
+  const handleViewDetails = (alertId) => {
+    console.log(`Viewing details for alert ${alertId}`);
+    setOpenDropdownId(null);
+  };
+
+  const handleDismissAlert = (alertId) => {
+    setAlerts(alerts.filter((alert) => alert.id !== alertId));
+    setOpenDropdownId(null);
+  };
+
+  const handleMarkAsResolved = (alertId) => {
+    console.log(`Marking alert ${alertId} as resolved`);
+    setOpenDropdownId(null);
+  };
+
   return (
     <div className="bg-[#FEFCFA] min-h-screen p-8">
       <div className="max-w-7xl mx-auto">
@@ -96,8 +155,56 @@ export default function Alerts() {
         </div>
         {/* Table of Alerts */}
         <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex flex-row justify-between items-center mb-4">
+          <div className="flex flex-row items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-gray-800">Table of alerts</h2>
+            <div className="flex gap-2 items-center">
+              <div className="relative w-60 md:w-72">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <Search className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+                  className="block w-full text-black pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-orange-500 transition-shadow duration-200"
+                  placeholder="Search alerts..."
+                />
+              </div>
+              <div className="relative">
+                <button
+                  onClick={toggleFilters}
+                  className="flex items-center gap-2 px-4 py-2 text-white bg-orange-500 border border-orange-500 rounded-lg whitespace-nowrap hover:bg-orange-600 transition-colors duration-200"
+                >
+                  <Filter className="text-white h-5 w-5" />
+                  <span>Filters</span>
+                </button>
+                {showFilters && (
+                  <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-10">
+                    <h3 className="text-sm font-semibold text-gray-700 mb-2">Filter Options</h3>
+                    {/* Filter by Severity */}
+                    <div className="mb-4">
+                      <label className="block text-sm text-gray-600 mb-1">Severity</label>
+                      <select
+                        value={filterSeverity}
+                        onChange={(e) => setFilterSeverity(e.target.value)}
+                        className="w-full border bg-white text-black border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
+                      >
+                        <option value="">All</option>
+                        <option value="Critical">Critical</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Low">Low</option>
+                      </select>
+                    </div>
+                    <button
+                      onClick={applyFilters}
+                      className="w-full bg-orange-500 text-white py-2 rounded-md hover:bg-orange-600 transition-colors duration-200"
+                    >
+                      Apply Filters
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
           {/* Table */}
           <div className="overflow-x-auto">
@@ -128,10 +235,10 @@ export default function Alerts() {
                 </tr>
               </thead>
               <tbody>
-                {mockAlerts.map((alert) => (
+                {currentAlerts.map((alert) => (
                   <tr 
                     key={alert.id} 
-                    className="border-b border-thin border-divider hover:bg-gray-50"
+                    className="border-b bg-white border-thin border-divider hover:bg-gray-50"
                   >
                     <td className="px-4 py-4">
                       <div className="font-medium text-gray-500">{alert.type}</div>
@@ -151,10 +258,35 @@ export default function Alerts() {
                       {alert.recommendation}
                     </td>
                     <td className="px-4 py-4 text-center">
-                      <div className="flex justify-center">
-                        <button className="rounded-full p-1 hover:bg-gray-100 transition-colors duration-150">
+                      <div className="relative flex justify-center">
+                        <button 
+                          onClick={() => toggleDropdown(alert.id)}
+                          className="rounded-full p-1 bg-white hover:bg-gray-100 transition-colors duration-150"
+                        >
                           <MoreVertical className="h-5 w-5 text-gray-400" />
                         </button>
+                        {openDropdownId === alert.id && (
+                          <div className="absolute right-0 mt-8 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                            <button
+                              onClick={() => handleViewDetails(alert.id)}
+                              className="block w-full bg-white text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            >
+                              View Details
+                            </button>
+                            <button
+                              onClick={() => handleDismissAlert(alert.id)}
+                              className="block w-full bg-white text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            >
+                              Dismiss Alert
+                            </button>
+                            <button
+                              onClick={() => handleMarkAsResolved(alert.id)}
+                              className="block w-full bg-white text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            >
+                              Mark as Resolved
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -165,13 +297,21 @@ export default function Alerts() {
           {/* Pagination */}
           <div className="flex justify-between items-center mt-4 pt-4">
             <div className="text-sm text-gray-500">
-              1 - 8 of 40 items
+              {indexOfFirstItem + 1} - {Math.min(indexOfLastItem, filteredAlerts.length)} of {filteredAlerts.length} items
             </div>
             <div className="flex gap-2">
-              <button className="px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 transition-colors duration-200">
+              <button
+                onClick={prevPage}
+                className="px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                disabled={currentPage === 1}
+              >
                 Previous
               </button>
-              <button className="px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 transition-colors duration-200">
+              <button
+                onClick={nextPage}
+                className="px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 transition-colors duration-200"
+                disabled={currentPage === totalPages}
+              >
                 Next
               </button>
             </div>
