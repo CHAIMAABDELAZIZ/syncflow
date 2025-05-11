@@ -114,23 +114,31 @@ export default function Engineers() {
             <h1 className="text-3xl font-bold text-gray-900">Engineers</h1>
             <p className="text-gray-500 mt-1">Jun 1 - Aug 31, 2025</p>
           </div>
-          <div className="flex gap-4 mt-4 md:mt-0">
-            <div className="bg-white rounded-lg shadow p-4 text-center">
-              <h2 className="text-xl font-semibold text-gray-900">1,520</h2>
-              <p className="text-sm text-gray-500">Total Engineers</p>
-              <p className="text-orange-500 font-medium">$9.0</p>
+          <div className="flex flex-col md:flex-row gap-6 mt-4 md:mt-0">
+            <div className="p-1">
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-5xl text-black font-bold">1,520</span>
+                <span className="bg-orange-100 text-orange-600 px-2 py-1 rounded-md font-medium">
+                  $10.9
+                </span>
+              </div>
+              <p className="text-gray-500 mt-1">Engineers active</p>
             </div>
-            <div className="bg-white rounded-lg shadow p-4 text-center">
-              <h2 className="text-xl font-semibold text-gray-900">78</h2>
-              <p className="text-sm text-gray-500">New Engineers</p>
-              <p className="text-orange-500 font-medium">$5.9</p>
+            <div className="p-1">
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-5xl text-black font-bold">78</span>
+                <span className="bg-orange-100 text-orange-600 px-2 py-1 rounded-md font-medium">
+                  $5.9
+                </span>
+              </div>
+              <p className="text-gray-500 mt-1">Engineers to hire</p>
             </div>
           </div>
         </div>
 
         {/* Table Section */}
         <div className="bg-white rounded-lg shadow p-6 relative">
-          {/* Engineers Title (replacing tabs) */}
+          {/* Engineers Title */}
           <div className="flex justify-between items-center mb-4">
             <div>
               <h2 className="text-xl font-bold text-gray-900">Engineers</h2>
@@ -261,11 +269,20 @@ export default function Engineers() {
                   <th className="px-4 py-3 text-center font-medium text-gray-400">
                     <div className="flex items-center justify-center gap-1">
                       <span>Contact</span>
-                      <img
-                          src="/phone.svg"
-                          alt="Status"
-                          className="h-4 w-4"
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M3 5h18M3 12h18M3 19h18"
                         />
+                      </svg>
                     </div>
                   </th>
                   <th className="px-4 py-3 text-center font-medium text-gray-400">
@@ -387,9 +404,7 @@ export default function Engineers() {
                     </td>
                     <td className="px-4 py-4 text-center">
                       <div className="flex items-center justify-center gap-2">
-                        <div className="h-8 w-8 rounded-full bg-gray-200">
-                          <img alt="Profile" class="h-full w-full object-cover" src="/engineer-placeholder.png" />
-                        </div>
+                        <div className="h-8 w-8 rounded-full bg-gray-200"></div>
                         <span className="text-gray-700">{engineer.fullName}</span>
                       </div>
                     </td>
