@@ -1,6 +1,5 @@
 import React from 'react';
-import { Home, BarChart2, FileText, Users, Settings, HelpCircle, LogOut } from 'lucide-react';
-import top from '../assets/top.png';
+import { Home, BarChart2, FileText, Users, Settings, HelpCircle, LogOut, List, Bell } from 'lucide-react'; import top from '../assets/top.png';
 import { useNavigate } from 'react-router-dom';
 
 
@@ -25,18 +24,19 @@ const Sidebar = () => {
                     
                 </button>
                 <button onClick={() => handleNavigation('/dashboard')} className="p-3 bg-white text-gray-800 hover:text-orange-500 hover:border-orangePtrm">
-                    <BarChart2 size={20} />
+                    <List size={20} />
                     
                 </button>
-                <button className="p-3 bg-white text-gray-800 hover:text-orange-500 hover:border-orangePtrm">
+                <button onClick={() => handleNavigation('/reports')} className="p-3 bg-white text-gray-800 hover:text-orange-500 hover:border-orangePtrm">
                     <FileText size={20} />
                 </button>
                 <button onClick={() => handleNavigation('/alerts')} className="p-3 bg-white text-gray-800 hover:text-orange-500 hover:border-orangePtrm">
-                    <Users size={20} />
+                    <Bell size={20} />
                 </button>
                 <button onClick={() => handleNavigation('/engineers')} className="p-3 bg-white text-gray-800 hover:text-orange-500 hover:border-orangePtrm">
                     <Users size={20} />
                 </button>
+
             </div>
 
             {/* Bottom Icons */}

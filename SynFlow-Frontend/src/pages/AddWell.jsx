@@ -183,6 +183,21 @@ const AddWell = () => {
                 const response = await submitWellData(wellData);
 
                 if (response.success) {
+                    const puits = response.data;
+
+                    try {
+                        // Créer le forage après le puits
+                        const forageData = {
+                            cout: 0,
+                            date_debut: null,
+                            date_fin: null,
+                            puits: { id: puits.id },
+                        };
+                        await axios.post(`${API_BASE_URL}/forages`, forageData);
+                        console.log('Forage créé avec succès !');
+                    } catch (error) {
+                        console.error('Erreur lors de la création du forage :', error.message);
+                    }
                     setNotification({
                         show: true,
                         type: 'success',
@@ -190,7 +205,7 @@ const AddWell = () => {
                     });
                     setTimeout(() => {
                         setNotification({ show: false, type: '', message: '' });
-                        navigate('/adduser');
+                        navigate('/dashboard');
                     }, 3000);
                 }
             } catch (error) {
