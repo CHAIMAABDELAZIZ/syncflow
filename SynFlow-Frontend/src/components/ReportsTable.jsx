@@ -148,10 +148,10 @@ export default function ReportsTable() {
                 <div className="border rounded-lg overflow-hidden">
                     <div className="grid grid-cols-12 items-center bg-white px-4 py-3 text-sm font-medium">
                         <div className="col-span-1">
-                            <input
-                                type="checkbox"
-                                disabled
-                                className="form-checkbox text-orange-500 border-gray-300"
+                          <input
+                            type="checkbox"
+                            disabled
+                            className="appearance-none w-4 h-4 border border-gray-300 rounded bg-white checked:bg-orange-500 disabled:opacity-50"
                             />
                         </div>
                         <div className="col-span-5">Identifier</div>
@@ -166,12 +166,30 @@ export default function ReportsTable() {
                                 onClick={() => handleRowClick(report.wellId)}
                             >
                                 <div className="col-span-1" onClick={(e) => e.stopPropagation()}>
-                                    <input
-                                        type="checkbox"
-                                        checked={isSelected(report.id)}
-                                        onChange={() => toggleSelect(report.id)}
-                                        className="form-checkbox text-orange-500 border-gray-300"
-                                    />
+                              <label className="relative inline-block w-4 h-4">
+  <input
+    type="checkbox"
+    checked={isSelected(report.id)}
+    onChange={() => toggleSelect(report.id)}
+    className="peer appearance-none w-4 h-4 border border-gray-300 rounded bg-white checked:bg-orange-500"
+    onClick={(e) => e.stopPropagation()}
+  />
+  <svg
+    className="absolute top-0 left-0 w-4 h-4 text-white pointer-events-none opacity-0 peer-checked:opacity-100"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="3"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+</label>
+
+
+
+
                                 </div>
                                 <div className="col-span-5">{report.identifier}</div>
                                 <div className="col-span-4">{report.well}</div>
@@ -200,6 +218,11 @@ export default function ReportsTable() {
                             size="sm"
                             disabled={currentPage === 1}
                             onClick={() => setCurrentPage((prev) => prev - 1)}
+                           
+                             style={{
+        backgroundColor: '#ffffff', // light gray, change to any valid CSS color
+        color: '#000' // optional: text color for contrast
+    }}
                         >
                             Previous
                         </Button>
@@ -208,6 +231,7 @@ export default function ReportsTable() {
                             size="sm"
                             disabled={currentPage === totalPages || totalPages === 0}
                             onClick={() => setCurrentPage((prev) => prev + 1)}
+                            style={{  backgroundColor: '#FF8500',}}
                         >
                             Next
                         </Button>

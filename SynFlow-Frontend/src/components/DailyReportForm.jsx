@@ -410,7 +410,11 @@ export default function DailyReportForm() {
                                                 <button
                                                     type="button"
                                                     onClick={() => removeIndicator(operation.id, indicator.id)}
-                                                    className="text-gray-400 hover:text-red-500 transition-colors"
+                                                    className="text-white hover:text-red-500  transition-colors"
+                                                    style={{
+                                                        backgroundColor: '#FF8500',
+                                                        
+                                                    }}
                                                 >
                                                     <X size={18} />
                                                 </button>

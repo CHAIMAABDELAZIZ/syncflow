@@ -84,8 +84,8 @@ const wellData = {
             { name: 'Casing Installation', cost: '35k$', provisional: '30k$', variance: 'on-track', progress: 100, members: 2 },
         ],
         2: [
-            { name: 'Intermediate Drilling', cost: '65k$', provisional: '60k$', variance: 'on-track', progress: 100, members: 4 },
-            { name: 'Cementing Operations', cost: '40k$', provisional: '35k$', variance: 'under-surveillance', progress: 100, members: 3 },
+            { name: 'Intermediate Drilling', cost: '6500000', provisional: '6000000', variance: 'on-track', progress: 100, members: 4 },
+            { name: 'Cementing Operations', cost: '4000000', provisional: '3500000', variance: 'under-surveillance', progress: 100, members: 3 },
         ],
         3: [
             { name: 'Production Drilling', cost: '120k$', provisional: '100k$', variance: 'under-surveillance', progress: 75, members: 5 },
@@ -162,7 +162,7 @@ export default function WellDetail() {
 
 
     return (
-        <div className="flex flex-col gap-6 p-6 bg-white min-h-screen">
+        <div className="flex text-black flex-col gap-6 p-6 bg-white min-h-screen">
             {/* Header */}
             <header className="flex justify-between items-center">
                 <div>
@@ -584,7 +584,7 @@ export default function WellDetail() {
                                 <th className="py-4 px-6 text-left font-semibold flex items-center">
                                     Operation <span className="ml-2">↓</span>
                                 </th>
-                                <th className="py-4 px-6 text-left font-semibold">Costs</th>
+                                <th className="py-4 px-6 text-left font-semibold">Costs(DZD)</th>
                                 <th className="py-4 px-6 text-left font-semibold">Provisional costs</th>
                                 <th className="py-4 px-6 text-left font-semibold">Status</th>
                                 <th className="py-4 px-6 text-left font-semibold">Operation progress</th>

@@ -145,7 +145,7 @@ export default function Engineers() {
                     <div className="flex justify-between items-center mb-4">
                         <div>
                             <h2 className="text-xl font-bold text-gray-900">Engineers</h2>
-                            <p className="text-gray-500 mt-1">A descriptive body text comes here</p>
+                            <p className="text-gray-500 mt-1">A list of wells' engineers</p>
                         </div>
                         <div className="flex gap-2 items-center relative">
                             <button
@@ -272,11 +272,7 @@ export default function Engineers() {
                                     <th className="px-4 py-3 text-center font-medium text-gray-400">
                                         <div className="flex items-center justify-center gap-1">
                                             <span>Contact</span>
-                                            <img
-                                                src="/phone.svg"
-                                                alt="Sort"
-                                                className="h-4 w-4"
-                                            />
+                                          
                                         </div>
                                     </th>
                                     <th className="px-4 py-3 text-center font-medium text-gray-400">
@@ -399,7 +395,7 @@ export default function Engineers() {
                                         <td className="px-4 py-4 text-center">
                                             <div className="flex items-center justify-center gap-2">
                                                 <div className="h-8 w-8 rounded-full bg-gray-200">
-                                                    <img alt="Profile" class="h-full w-full object-cover" src="/engineer-placeholder.png" />
+                                                    <img alt="Profile" class="h-full w-full object-cover" src="/chaima.jpeg" />
                                                 </div>
                                                 <span className="text-gray-700">{engineer.fullName}</span>
                                             </div>
