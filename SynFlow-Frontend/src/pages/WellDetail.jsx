@@ -247,7 +247,6 @@ export default function WellDetail() {
                             <>
                                 <div className="mb-6">
                                     <h2 className="text-xl font-semibold">Nom : {well.nom}</h2>
-                                    <p><strong>Coordonnées :</strong> X = {well.coord_x}, Y = {well.coord_y}</p>
                                 </div>
 
                                 {well.coord_y && well.coord_x ? (
