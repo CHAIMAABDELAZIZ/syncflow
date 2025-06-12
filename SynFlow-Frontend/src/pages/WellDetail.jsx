@@ -1,5 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from "react-router-dom";
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import axios from 'axios';
+
+// Pour résoudre les icônes Leaflet manquantes
+import L from 'leaflet';
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+delete L.Icon.Default.prototype._getIconUrl;
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
+
 
 // Sample data structure with additional well depth information
 const wellData = {
@@ -84,8 +102,8 @@ const wellData = {
             { name: 'Casing Installation', cost: '35k$', provisional: '30k$', variance: 'on-track', progress: 100, members: 2 },
         ],
         2: [
-            { name: 'Intermediate Drilling', cost: '65k$', provisional: '60k$', variance: 'on-track', progress: 100, members: 4 },
-            { name: 'Cementing Operations', cost: '40k$', provisional: '35k$', variance: 'under-surveillance', progress: 100, members: 3 },
+            { name: 'Intermediate Drilling', cost: '6500000', provisional: '6000000', variance: 'on-track', progress: 100, members: 4 },
+            { name: 'Cementing Operations', cost: '4000000', provisional: '3500000', variance: 'under-surveillance', progress: 100, members: 3 },
         ],
         3: [
             { name: 'Production Drilling', cost: '120k$', provisional: '100k$', variance: 'under-surveillance', progress: 75, members: 5 },
@@ -127,6 +145,8 @@ const getStatusLabel = (status) => {
     }
 };
 
+
+
 export default function WellDetail() {
     const [selectedPhase, setSelectedPhase] = useState(null);
     const [phasePopup, setPhasePopup] = useState(null);
@@ -158,11 +178,37 @@ export default function WellDetail() {
         return wellData.operations;
     };
 
+
+    const [well, setWell] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchWell = async () => {
+            try {
+                const response = await axios.get(`http://localhost:8080/api/puits/${id}`);
+                if (response.data.success) {
+                    setWell(response.data.data);
+                } else {
+                    setError('Aucune donnée trouvée pour ce puits');
+                }
+            } catch (err) {
+                setError('Erreur lors de la récupération du puits');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchWell();
+    }, [id]);
+
+
+
     const navigate = useNavigate();
 
 
     return (
-        <div className="flex flex-col gap-6 p-6 bg-white min-h-screen">
+        <div className="flex text-black flex-col gap-6 p-6 bg-white min-h-screen">
             {/* Header */}
             <header className="flex justify-between items-center">
                 <div>
@@ -189,69 +235,116 @@ export default function WellDetail() {
             {/* Main Content */}
             <div className="flex flex-col gap-6">
                 {/* Top Row: Progress and Details */}
-                <div className="flex gap-6">
-                    {/* Progress Card */}
-                    <div className="bg-orange-500 text-white rounded-xl p-6 w-72 shadow-lg flex flex-col gap-3">
-                        <h3 className="text-xl font-bold border-l-4 border-white pl-3">Progress of well</h3>
-                        <div className="flex justify-between items-center">
-                            <div>Countdown:</div>
-                            <div className="font-bold text-2xl">{wellData.progress.countdown} days</div>
-                        </div>
-                        <div className="flex justify-between items-center">
-                            <div>Completed:</div>
-                            <div className="font-bold text-2xl">{wellData.progress.completed} days</div>
-                        </div>
-                        <div className="flex justify-between items-center">
-                            <div>Total days:</div>
-                            <div className="font-bold text-lg">{wellData.progress.total} days</div>
-                        </div>
-                        <div className="flex justify-between items-center">
-                            <div>Begin:</div>
-                            <div>{wellData.progress.begin}</div>
-                        </div>
-                        <div className="flex justify-between items-center">
-                            <div>Completion:</div>
-                            <div>{wellData.progress.completion}</div>
-                        </div>
+                <div className="flex flex-col gap-6">
+                    {/* Carte Détails du puits (en dessous, pleine largeur) */}
+                    <div className="w-full bg-white text-black rounded-xl p-6 shadow-lg">
+                        <h1 className="text-2xl font-bold mb-4">Détails du Puits</h1>
+                        {loading ? (
+                            <p>Chargement en cours...</p>
+                        ) : error ? (
+                            <p className="text-red-500">{error}</p>
+                        ) : well ? (
+                            <>
+                                <div className="mb-6">
+                                    <h2 className="text-xl font-semibold">Nom : {well.nom}</h2>
+                                    <p><strong>Coordonnées :</strong> X = {well.coord_x}, Y = {well.coord_y}</p>
+                                </div>
+
+                                {well.coord_y && well.coord_x ? (
+                                    <div className="h-[300px] w-full rounded shadow border">
+                                        <MapContainer
+                                            center={[well.coord_y, well.coord_x]}
+                                            zoom={13}
+                                            style={{ height: '100%', width: '100%' }}
+                                        >
+                                            <TileLayer
+                                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                            />
+                                            <Marker position={[well.coord_y, well.coord_x]}>
+                                                <Popup>
+                                                    <strong>{well.nom}</strong><br />
+                                                    ID: {well.id}
+                                                </Popup>
+                                            </Marker>
+                                        </MapContainer>
+                                    </div>
+                                ) : (
+                                    <p className="text-gray-500">Coordonnées non disponibles pour ce puits.</p>
+                                )}
+                            </>
+                        ) : (
+                            <p>Puits introuvable.</p>
+                        )}
                     </div>
-
-                    {/* Details and Graph */}
-                    <div className="flex-1 bg-white rounded-xl p-6 shadow-lg">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-xl font-bold text-gray-800">Details</h2>
-                            <button className="text-gray-500 hover:text-gray-700 bg-white text-xl">⋮</button>
+                    {/* Row contenant les 2 cartes côte à côte */}
+                    <div className="flex gap-6">
+                        {/* Progress Card */}
+                        <div className="w-1/2 bg-orange-500 text-white rounded-xl p-6 shadow-lg flex flex-col gap-3">
+                            <h3 className="text-xl font-bold border-l-4 border-white pl-3">Progress of well</h3>
+                            <div className="flex justify-between items-center">
+                                <div>Countdown:</div>
+                                <div className="font-bold text-2xl">{wellData.progress.countdown} days</div>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <div>Completed:</div>
+                                <div className="font-bold text-2xl">{wellData.progress.completed} days</div>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <div>Total days:</div>
+                                <div className="font-bold text-lg">{wellData.progress.total} days</div>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <div>Begin:</div>
+                                <div>{wellData.progress.begin}</div>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <div>Completion:</div>
+                                <div>{wellData.progress.completion}</div>
+                            </div>
                         </div>
 
-                        {/* Enhanced Funnel Graph */}
-                        <div className="relative h-40">
-                            <div className="absolute top-0 left-0 w-full flex justify-between px-6 text-sm font-medium">
-                                <div className="bg-gray-800 text-white px-3 py-1 rounded-full">{wellData.details.percentages[0]}%</div>
-                                <div className="bg-gray-800 text-white px-3 py-1 rounded-full">{wellData.details.percentages[1]}%</div>
-                                <div className="bg-gray-800 text-white px-3 py-1 rounded-full">{wellData.details.percentages[2]}%</div>
+                        {/* Details and Graph */}
+                        <div className="w-1/2 bg-white rounded-xl p-6 shadow-lg">
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-xl font-bold text-gray-800">Details</h2>
+                                <button className="text-gray-500 hover:text-gray-700 bg-white text-xl">⋮</button>
                             </div>
 
-                            <div className="absolute bottom-0 left-0 w-full h-32">
-                                <div className="w-full h-full relative overflow-hidden">
-                                    <div
-                                        className="absolute w-full h-full transition-all duration-300 hover:opacity-90"
-                                        style={{
-                                            background: 'linear-gradient(to right, #4ade80 0%, #fbbf24 50%, #ef4444 100%)',
-                                        }}
-                                    />
-                                    <div className="absolute top-0 left-[4%] w-px h-full border-l-2 border-dashed border-gray-800"></div>
-                                    <div className="absolute top-0 left-[21%] w-px h-full border-l-2 border-dashed border-gray-800"></div>
-                                    <div className="absolute top-0 left-[72%] w-px h-full border-l-2 border-dashed border-gray-800"></div>
+                            <div className="relative h-40">
+                                <div className="absolute top-0 left-0 w-full flex justify-between px-6 text-sm font-medium">
+                                    <div className="bg-gray-800 text-white px-3 py-1 rounded-full">{wellData.details.percentages[0]}%</div>
+                                    <div className="bg-gray-800 text-white px-3 py-1 rounded-full">{wellData.details.percentages[1]}%</div>
+                                    <div className="bg-gray-800 text-white px-3 py-1 rounded-full">{wellData.details.percentages[2]}%</div>
+                                </div>
+
+                                <div className="absolute bottom-0 left-0 w-full h-32">
+                                    <div className="w-full h-full relative overflow-hidden">
+                                        <div
+                                            className="absolute w-full h-full transition-all duration-300 hover:opacity-90"
+                                            style={{
+                                                background: 'linear-gradient(to right, #4ade80 0%, #fbbf24 50%, #ef4444 100%)',
+                                            }}
+                                        />
+                                        <div className="absolute top-0 left-[4%] w-px h-full border-l-2 border-dashed border-gray-800"></div>
+                                        <div className="absolute top-0 left-[21%] w-px h-full border-l-2 border-dashed border-gray-800"></div>
+                                        <div className="absolute top-0 left-[72%] w-px h-full border-l-2 border-dashed border-gray-800"></div>
+                                    </div>
+                                </div>
+
+                                <div className="absolute bottom-0 left-0 w-full flex justify-between px-12 text-sm text-gray-700">
+                                    <div>{wellData.details.flowPoints[0]}%</div>
+                                    <div>{wellData.details.flowPoints[1]}%</div>
+                                    <div>{wellData.details.flowPoints[2]}%</div>
                                 </div>
                             </div>
-
-                            <div className="absolute bottom-0 left-0 w-full flex justify-between px-12 text-sm text-gray-700">
-                                <div>{wellData.details.flowPoints[0]}%</div>
-                                <div>{wellData.details.flowPoints[1]}%</div>
-                                <div>{wellData.details.flowPoints[2]}%</div>
-                            </div>
                         </div>
                     </div>
+
+                    
                 </div>
+
+
 
                 {/* Phases Tracking - Now below Progress and Details */}
                 <div className="bg-white rounded-xl p-6 shadow-lg">
@@ -584,7 +677,7 @@ export default function WellDetail() {
                                 <th className="py-4 px-6 text-left font-semibold flex items-center">
                                     Operation <span className="ml-2">↓</span>
                                 </th>
-                                <th className="py-4 px-6 text-left font-semibold">Costs</th>
+                                <th className="py-4 px-6 text-left font-semibold">Costs(DZD)</th>
                                 <th className="py-4 px-6 text-left font-semibold">Provisional costs</th>
                                 <th className="py-4 px-6 text-left font-semibold">Status</th>
                                 <th className="py-4 px-6 text-left font-semibold">Operation progress</th>

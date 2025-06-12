@@ -271,7 +271,7 @@ export default function Dashboard() {
                             await deletePuitWithDependencies(well.id); // Supprime dans le backend
                             setWells(prevWells => prevWells.filter(w => w.id !== well.id)); // Met à jour l’état local
                           }}
-                          className="text-red-600 hover:text-red-800 font-medium"
+                          className="text-red-600 bg-white border-red-800 hover:border-red-800 hover:bg-red-200  font-medium"
                         >
                           Delete
                         </button>
