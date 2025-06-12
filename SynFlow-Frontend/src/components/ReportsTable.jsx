@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MoreVertical } from 'lucide-react';
+import axios from 'axios';
 import { Button } from '../components/ui/button';
 import {
     DropdownMenu,
@@ -11,23 +13,64 @@ import * as XLSX from 'xlsx';
 
 const ITEMS_PER_PAGE = 8;
 
-const mockData = Array.from({ length: 40 }, (_, i) => ({
-    id: i + 1,
-    identifier: `Report_x${i + 2323}.xlsx`,
-    well: 'Well #A-105',
-}));
-
 export default function ReportsTable() {
-    const [activeTab, setActiveTab] = useState('Tab 1');
+    const [activeTab, setActiveTab] = useState('Journaliers');
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedReports, setSelectedReports] = useState([]);
+    const [reports, setReports] = useState([]);
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
 
-    const handleNavigation = (path) => {
-        navigate(path);
-    };
+    useEffect(() => {
+        setError(null);
+        setLoading(true);
+        if (activeTab === 'Prévisionnels') {
+            const fetchWells = async () => {
+                try {
+                    const response = await axios.get('http://localhost:8080/api/puits');
+                    if (response.data.success) {
+                        const reportData = response.data.data.map((well, index) => ({
+                            id: index + 1,
+                            identifier: `report-${well.id}`,
+                            well: well.name || `Well #${well.id}`,
+                            wellId: well.id.toString(),
+                        }));
+                        setReports(reportData);
+                    } else {
+                        throw new Error('API response indicates failure');
+                    }
+                } catch (error) {
+                    console.error('Error fetching wells:', error.message);
+                    setError(`Failed to fetch wells: ${error.message}`);
+                    setReports(
+                        Array.from({ length: 40 }, (_, i) => ({
+                            id: i + 1,
+                            identifier: `report-x${i + 2323}`,
+                            well: 'Well #A-105',
+                            wellId: `x${i + 2323}`,
+                        }))
+                    );
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchWells();
+        } else {
+            setReports(
+                Array.from({ length: 40 }, (_, i) => ({
+                    id: i + 1,
+                    identifier: `Report_x${i + 2323}.xlsx`,
+                    well: 'Well #A-105',
+                    wellId: `x${i + 2323}`,
+                }))
+            );
+            setLoading(false);
+        }
+    }, [activeTab]);
 
-    const filteredReports = mockData.filter((report) =>
+    const filteredReports = reports.filter((report) =>
         report.identifier.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
@@ -52,9 +95,12 @@ export default function ReportsTable() {
 
     const isSelected = (id) => selectedReports.includes(id);
 
+    const handleRowClick = (wellId) => {
+        navigate(`/provisional-report/${wellId}`);
+    };
+
     return (
         <div className="p-6">
-            {/* Header */}
             <div className="flex items-center justify-between mb-2">
                 <h1 className="text-xl font-semibold">Reports lists</h1>
                 <div className="flex gap-2">
@@ -64,7 +110,8 @@ export default function ReportsTable() {
                     >
                         Export
                     </Button>
-                    <Button onClick={() => handleNavigation('/home')}
+                    <Button
+                        onClick={() => navigate('/home')}
                         className="bg-orange-500 hover:bg-orange-600 text-white"
                     >
                         + Add a report
@@ -73,10 +120,10 @@ export default function ReportsTable() {
             </div>
 
             <p className="text-gray-500 text-sm mb-4">
-                A descriptive  of the <span className="text-orange-600 font-medium cursor-pointer">list of reports</span>
+                A descriptive of the{' '}
+                <span className="text-orange-600 font-medium cursor-pointer">list of reports</span>
             </p>
 
-            {/* Tabs */}
             <div className="flex gap-2 mb-4 bg-white p-2 rounded">
                 {['Journaliers', 'Prévisionnels'].map((tab) => (
                     <button
@@ -92,82 +139,81 @@ export default function ReportsTable() {
                 ))}
             </div>
 
+          
 
-            {/* Table */}
-            <div className="border rounded-lg overflow-hidden">
-                <div className="grid grid-cols-12 items-center bg-white px-4 py-3 text-sm font-medium">
-                    <div className="col-span-1">
-                        <input
-                            type="checkbox"
-                            disabled
-                            className="form-checkbox text-orange-500 border-gray-300"
-                        />
-                    </div>
-                    <div className="col-span-5">Identifier</div>
-                    <div className="col-span-4">Well Associated</div>
-                    <div className="col-span-2 text-right">Action</div>
-                </div>
+            {loading && <div className="text-center py-6 text-gray-500">Loading...</div>}
+            {error && !loading && <div className="mb-4 text-red-500 text-sm">{error}</div>}
 
-                {paginatedReports.map((report) => (
-                    <div
-                        key={report.id}
-                        className="grid grid-cols-12 items-center px-4 py-3 border-t hover:bg-gray-50 text-sm bg-white"
-                    >
+            {!loading && (
+                <div className="border rounded-lg overflow-hidden">
+                    <div className="grid grid-cols-12 items-center bg-white px-4 py-3 text-sm font-medium">
                         <div className="col-span-1">
                             <input
                                 type="checkbox"
-                                checked={isSelected(report.id)}
-                                onChange={() => toggleSelect(report.id)}
+                                disabled
                                 className="form-checkbox text-orange-500 border-gray-300"
                             />
                         </div>
-                        <div className="col-span-5">{report.identifier}</div>
-                        <div className="col-span-4">{report.well}</div>
-                        <div className="col-span-2 text-right">
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button className="bg-white hover:bg-orange-50 text-gray-700 p-2 rounded">
-                                        <MoreVertical className="w-4 h-4" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    <DropdownMenuItem onClick={() => alert(`Viewing ${report.identifier}`)}>View</DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => alert(`Editing ${report.identifier}`)}>Edit</DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => alert(`Deleting ${report.identifier}`)}>Delete</DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </div>
+                        <div className="col-span-5">Identifier</div>
+                        <div className="col-span-4">Well Associated</div>
                     </div>
-                ))}
-            </div>
 
-            {/* Pagination */}
-            <div className="flex items-center justify-between mt-4 text-sm text-gray-600">
-                <span>
-                    {`${(currentPage - 1) * ITEMS_PER_PAGE + 1} – ${Math.min(
-                        currentPage * ITEMS_PER_PAGE,
-                        filteredReports.length
-                    )} of ${filteredReports.length} items`}
-                </span>
-                <div className="flex gap-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={currentPage === 1}
-                        onClick={() => setCurrentPage((prev) => prev - 1)}
-                    >
-                        Previous
-                    </Button>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={currentPage === totalPages}
-                        onClick={() => setCurrentPage((prev) => prev + 1)}
-                    >
-                        Next
-                    </Button>
+                    {paginatedReports.length > 0 ? (
+                        paginatedReports.map((report) => (
+                            <div
+                                key={report.id}
+                                className="grid grid-cols-12 items-center px-4 py-3 border-t hover:bg-gray-50 text-sm bg-white cursor-pointer"
+                                onClick={() => handleRowClick(report.wellId)}
+                            >
+                                <div className="col-span-1" onClick={(e) => e.stopPropagation()}>
+                                    <input
+                                        type="checkbox"
+                                        checked={isSelected(report.id)}
+                                        onChange={() => toggleSelect(report.id)}
+                                        className="form-checkbox text-orange-500 border-gray-300"
+                                    />
+                                </div>
+                                <div className="col-span-5">{report.identifier}</div>
+                                <div className="col-span-4">{report.well}</div>
+                                
+                            </div>
+                        ))
+                    ) : (
+                        <div className="text-center py-6 text-gray-500">No reports available.</div>
+                    )}
                 </div>
-            </div>
+            )}
+
+            {!loading && (
+                <div className="flex items-center justify-between mt-4 text-sm text-gray-600">
+                    <span>
+                        {filteredReports.length > 0
+                            ? `${(currentPage - 1) * ITEMS_PER_PAGE + 1} – ${Math.min(
+                                currentPage * ITEMS_PER_PAGE,
+                                filteredReports.length
+                            )} of ${filteredReports.length} items`
+                            : '0 items'}
+                    </span>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={currentPage === 1}
+                            onClick={() => setCurrentPage((prev) => prev - 1)}
+                        >
+                            Previous
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={currentPage === totalPages || totalPages === 0}
+                            onClick={() => setCurrentPage((prev) => prev + 1)}
+                        >
+                            Next
+                        </Button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

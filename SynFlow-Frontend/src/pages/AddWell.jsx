@@ -35,11 +35,15 @@ const fetchRegions = async () => {
     try {
         const response = await axios.get(`${API_BASE_URL}/regions`);
         console.log('Regions response:', response.data);
-        return response.data.data || response.data; // Adjust based on actual response structure
+        // Filter out regions with null names and map to { id, name }
+        const validRegions = (response.data.data || response.data)
+            .filter(region => region.nom !== null)
+            .map(region => ({ id: region.id, name: region.nom }));
+        return validRegions;
     } catch (error) {
         console.error('Failed to fetch regions:', error.message);
         // Mock data with known valid ID from Postman
-        return [{ id: 1, name: 'North' }];
+        return [{ id: 1, name: 'Région Nord' }];
     }
 };
 
@@ -126,7 +130,7 @@ const AddWell = () => {
                     fetchMembers(),
                 ]);
                 setWellTypes(types);
-                setRegions(regionsData);
+                setRegions(regionsData); // This will now contain [{ id, name }, ...]
                 setMembers(membersData);
             } catch (error) {
                 setNotification({

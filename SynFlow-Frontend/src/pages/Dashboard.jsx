@@ -20,6 +20,7 @@ export default function Dashboard() {
           // Map API data to match table structure
           const mappedWells = response.data.data.map(well => ({
             id: well.id.toString(), // Convert to string for consistency
+            name: well.nom.toString(),
             status: well.statut === 'EN_COURS' ? 'Active' : 'InActive', // Map statut to Active/InActive
             phase: well.type || 'Forage', // Use type as phase, default to 'Forage'
             progress: Math.floor(Math.random() * 40) + 60, // Placeholder: API doesn't provide progress
@@ -55,6 +56,38 @@ export default function Dashboard() {
   const getStatusBgColor = (status) => {
     return status === "Active" ? "bg-green-100" : "bg-red-100";
   };
+
+  async function deletePuitWithDependencies(puitId) {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/forages/puit/${puitId}`);
+      const forages = response.data?.data || [];
+
+      for (const forage of forages) {
+        const resPhases = await axios.get(`http://localhost:8080/api/phases/forage/${forage.id}`);
+        const phases = resPhases.data?.data || [];
+
+        for (const phase of phases) {
+          const resOperations = await axios.get(`http://localhost:8080/api/operations/phase/${phase.id}`);
+          const operations = resOperations.data?.data || [];
+
+          for (const operation of operations) {
+            await axios.delete(`http://localhost:8080/api/operations/${operation.id}`);
+          }
+
+          await axios.delete(`http://localhost:8080/api/phases/${phase.id}`);
+        }
+
+        await axios.delete(`http://localhost:8080/api/forages/${forage.id}`);
+      }
+
+      await axios.delete(`http://localhost:8080/api/puits/${puitId}`);
+
+      console.log(`Puit ${puitId} et toutes ses dépendances ont été supprimés.`);
+    } catch (error) {
+      console.error("Erreur lors de la suppression du puits :", error);
+    }
+  }
+
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
@@ -116,45 +149,6 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Tabs, Search and Filter */}
-            <div className="flex flex-wrap md:flex-nowrap items-center justify-between mb-4 gap-3">
-              <div className="inline-flex rounded-md border border-gray-200 overflow-hidden">
-                <button
-                  className={`py-2 px-4 ${activeTab === 1 ? "bg-white text-gray-800 font-medium" : "bg-gray-50 text-gray-500 hover:bg-gray-100"}`}
-                  onClick={() => setActiveTab(1)}
-                >
-                  Active Tab 1
-                </button>
-                <button
-                  className={`py-2 px-4 border-l ${activeTab === 2 ? "bg-white text-gray-800 font-medium" : "bg-gray-50 text-gray-500 hover:bg-gray-100"}`}
-                  onClick={() => setActiveTab(2)}
-                >
-                  Tab 2
-                </button>
-                <button
-                  className={`py-2 px-4 border-l ${activeTab === 3 ? "bg-white text-gray-800 font-medium" : "bg-gray-50 text-gray-500 hover:bg-gray-100"}`}
-                  onClick={() => setActiveTab(3)}
-                >
-                  Tab3
-                </button>
-              </div>
-              <div className="flex gap-2 items-center">
-                <div className="relative w-60 md:w-72">
-                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <Search className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    type="text"
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-orange-500"
-                    placeholder="Search"
-                  />
-                </div>
-                <button className="flex items-center gap-2 px-4 py-2 hover:border-orangePtrm text-black bg-white border border-gray-300 rounded-lg whitespace-nowrap hover:bg-gray-50">
-                  <Filter className="text-black h-5 w-5" />
-                  <span>Filters</span>
-                </button>
-              </div>
-            </div>
 
             {/* Table */}
             <div className="overflow-x-auto">
@@ -243,7 +237,7 @@ export default function Dashboard() {
                         </div>
                       </td>
                       <td className="px-4 py-4 text-center">
-                        <div className="font-medium text-gray-500">Well #{well.id}</div>
+                        <div className="font-medium text-gray-500">{well.name}</div>
                       </td>
                       <td className="px-4 py-4 text-center">
                         <div className="flex justify-center">
@@ -271,12 +265,20 @@ export default function Dashboard() {
                         </div>
                       </td>
                       <td className="px-4 py-4 text-center">
-                        <div className="flex justify-center">
-                          <button className="rounded-full p-1 bg-white hover:border-orangePtrm transition-colors duration-150">
-                            <MoreVertical className="h-5 w-5 text-gray-400" />
-                          </button>
-                        </div>
+                        <button
+                          onClick={async (e) => {
+                            e.stopPropagation(); // Empêche la navigation
+                            await deletePuitWithDependencies(well.id); // Supprime dans le backend
+                            setWells(prevWells => prevWells.filter(w => w.id !== well.id)); // Met à jour l’état local
+                          }}
+                          className="text-red-600 hover:text-red-800 font-medium"
+                        >
+                          Delete
+                        </button>
+
                       </td>
+
+
                     </tr>
                   ))}
                 </tbody>

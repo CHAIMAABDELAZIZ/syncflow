@@ -14,7 +14,7 @@ import PrvsReport from './pages/PrvsReport';
 import Reports from './pages/Reports';
 import WellDetail from './pages/WellDetail'; 
 import DailyReport from './pages/DailyReport';
-
+import Detailprvsreport from './pages/detailprvsreport';
 
 function App() {
   return (
@@ -36,6 +36,7 @@ function App() {
           <Route path="/welldetails/:id" element={<WellDetail />} /> 
           <Route path="/well/:id/add-daily-report" element={<DailyReport />} /> 
           <Route path="/well/:id/add-provisional-plan" element={<PrvsReport />} /> 
+          <Route path="/provisional-report/:wellId" element={<Detailprvsreport />} /> 
         </Route>
       </Routes>
     </BrowserRouter>
